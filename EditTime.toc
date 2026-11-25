@@ -7,6 +7,7 @@
 ## IconTexture: Interface\AddOns\EditTime\Media\EditTimeLogo
 ## X-Category: User Interface
 ## X-License: MIT
+## X-Curse-Project-ID: 1830731
 
 # Localization
 Locales\enUS.lua

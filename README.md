@@ -77,6 +77,21 @@ center of the screen, and the edges and corners of other frames, with the same r
 Blizzard's frames don't snap to them in return, and the arrow keys don't nudge them. Both would require changing
 Edit Mode's internal data, which EditTime avoids.
 
+## Installation
+
+Copy the `EditTime` folder into:
+
+```
+World of Warcraft\_forever_\Interface\AddOns\
+```
+
+so that `EditTime.toc` sits at `...\Interface\AddOns\EditTime\EditTime.toc`.
+
+## Compatibility
+
+EditTime works with Blizzard's own Edit Mode and default frames. Addons that replace those frames entirely, or
+that add their own options to the Edit Mode settings window, may overlap with what EditTime does.
+
 ## How EditTime stays safe
 
 EditTime is built so it never causes "Interface action failed because of an AddOn" errors.
@@ -88,12 +103,21 @@ EditTime is built so it never causes "Interface action failed because of an AddO
 * Some unit information is hidden from addons in certain places. When EditTime can't be certain about something,
   it leaves the frame exactly as Blizzard drew it.
 
+## License
+
+MIT. See [LICENSE](LICENSE).
+
 ## Development
 
-Link the repository into your AddOns folder, for example:
+EditTime embeds no libraries. Releases are packaged by
+[BigWigsMods/packager](https://github.com/BigWigsMods/packager) on tag push.
+
+To work on it, link the repository into your AddOns folder:
 
 ```
 mklink /J "<WoW folder>\_forever_\Interface\AddOns\EditTime" "<path to this repository>"
 ```
+
+The addon list icon is built from `Gallery/EditTimeLogo.png` with `python tools/build_logo.py`.
 
 To check for taint, run `/console taintLog 1`, play for a while, then look for EditTime in `Logs\taint.log`.

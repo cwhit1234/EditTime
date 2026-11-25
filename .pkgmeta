@@ -1,0 +1,21 @@
+package-as: EditTime
+
+# No embedded libraries -- EditTime is standalone.
+
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
+
+# Files that should not ship inside the packaged addon.
+ignore:
+  - .github
+  - .gitignore
+  - .gitattributes
+  - .editorconfig
+  - .luacheckrc
+  - .pkgmeta
+  - Gallery
+  - DESCRIPTION.md
+  - tools
+
+enable-nolib-creation: no

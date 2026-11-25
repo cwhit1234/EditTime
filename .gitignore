@@ -1,3 +1,17 @@
+# Packager output
+/.release/
+
+# Tooling / harness state (not part of the addon)
+/.claude/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
 .vscode/
+.idea/
 *.zip
-.release/
+
+# Python bytecode from tools/
+__pycache__/
+*.pyc

@@ -3,19 +3,25 @@
 ## Notes: Adds Match Width/Height, Visibility and party/raid frame options to Edit Mode.
 ## Author: raizennn
 ## Version: @project-version@
-## Category: User Interface
 ## SavedVariables: EditTimeDB
+## IconTexture: Interface\AddOns\EditTime\Media\EditTimeLogo
+## X-Category: User Interface
+## X-License: MIT
 
+# Localization
 Locales\enUS.lua
 
+# Core (storage, combat queue, Edit Mode layouts, system registry)
 Core\Init.lua
 Core\Combat.lua
 Core\Layouts.lua
 Core\Systems.lua
 
+# Shared UI (setting rows and the mover framework used by the features)
 UI\Rows.lua
 UI\Movers.lua
 
+# Features
 Features\SizeMatch.lua
 Features\Visibility.lua
 Features\RaidGrowth.lua
@@ -24,4 +30,5 @@ Features\UnitFrameElements.lua
 Features\ExtraMovers.lua
 Features\TextOptions.lua
 
+# Edit Mode settings panel (loads last so every feature's options are registered)
 UI\SettingsPanel.lua

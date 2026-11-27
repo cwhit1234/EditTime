@@ -55,6 +55,26 @@ until combat ends. EditTime never hides or covers anyone else's frame.
 space. Players without an assigned role keep their bar. Buff and debuff icons stay where they would sit above a
 power bar, because that position is shared with Blizzard's protected private aura system.
 
+### Unit Frames
+
+**Health Bar Color** (Player, Target, Focus, Target of Target and Focus Target frames) can be Default or Class /
+Reaction. With Class / Reaction, players show in their class color, and everyone else is red, yellow or green
+depending on how they feel about you, or grey when they're tapped by someone else or offline. Each frame has its
+own setting, so you can color your target by class and keep your own frame green.
+
+### Tooltip
+
+**Anchor** (HUD Tooltip) keeps tooltips at their Edit Mode position or attaches them to your cursor. With Cursor
+selected, the X Offset and Y Offset sliders move the tooltip away from the cursor, and you can also type an exact
+value into the box beside each slider. At 0, 0 the tooltip's bottom left corner sits right at the cursor. Only
+tooltips that would normally appear at the Edit Mode position follow the cursor. Tooltips that a frame places
+next to itself stay where they are.
+
+**Hide Health Bar** (HUD Tooltip) removes the health bar that appears under the tooltip for players and NPCs.
+
+**Instant Fade** (HUD Tooltip) makes the tooltip disappear the moment your mouse leaves a unit or object in the
+world, or a unit frame, instead of slowly fading out.
+
 ### Text
 
 **Hide Portrait Combat Text** (Player Frame) hides the damage, healing and miss numbers that flash over your

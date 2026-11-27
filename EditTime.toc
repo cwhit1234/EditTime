@@ -29,6 +29,8 @@ Features\RaidGrowth.lua
 Features\GroupLayout.lua
 Features\UnitFrameElements.lua
 Features\UnitFrameText.lua
+Features\HealthBarColor.lua
+Features\Tooltip.lua
 Features\ExtraMovers.lua
 Features\TextOptions.lua
 

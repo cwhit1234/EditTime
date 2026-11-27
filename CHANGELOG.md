@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.3] - 2026-11-27
+
+### Added
+- Health Bar Color for the Player, Target, Focus, Target of Target and Focus Target frames: Default
+  or Class / Reaction, set separately for each frame.
+- Anchor for the HUD Tooltip: its Edit Mode position or the cursor, with X and Y offsets that can
+  be dragged or typed in.
+- Hide Health Bar for the HUD Tooltip, to remove the bar under unit tooltips.
+- Instant Fade for the HUD Tooltip, so it disappears as soon as the mouse leaves a unit or object
+  instead of fading out.
+
 ## [1.0.2] - 2026-11-27
 
 ### Added

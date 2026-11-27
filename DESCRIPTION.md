@@ -17,6 +17,11 @@ a panel attached to Blizzard's own settings window, styled to match. Every setti
   layout stays centered as people join and leave.
 - **Party and raid frame options.** Hide your own frame, hide the "Party" title, hide DPS role icons, and only
   show power bars for tanks and healers.
+- **Unit frame options.** Class / Reaction health bar colors for the Player, Target, Focus, Target of Target and
+  Focus Target frames, each set on its own.
+- **Tooltip anchor.** Keep tooltips at their Edit Mode position or attach them to your cursor, with adjustable
+  X and Y offsets. Hide the health bar under unit tooltips, and make tooltips disappear instantly instead of
+  fading.
 - **Keybind text.** Shorten action bar keybinds (Shift + Mouse Button 4 becomes SM4) or hide them.
 - **Experience and reputation text.** Show Current / Max, a percentage, or both.
 - **More frames you can move.** Target of Target, Focus Target, Toasts and Loot Rolls get Edit Mode selection

@@ -69,11 +69,9 @@ local function RegisterToT(key, label, parentName, defaultOffsets)
 		end
 	end
 
-	local portraits = ns.OtherPlayerPortraitsOption
-	Movers.Register({
+	local def = {
 		key = key,
 		label = label,
-		options = portraits and portraits.available() and { portraits } or nil,
 		isAvailable = function()
 			local parent, tot = Parts()
 			return parent ~= nil and tot ~= nil
@@ -113,7 +111,21 @@ local function RegisterToT(key, label, parentName, defaultOffsets)
 				hooksecurefunc(parent, "SetSmallSize", ns.RequestRefresh)
 			end
 		end,
-	})
+	}
+
+	local options = {}
+	if ns.HealthBarColorMoverOption then
+		options[#options + 1] = ns.HealthBarColorMoverOption(def, function()
+			local _, tot = Parts()
+			return tot and tot.healthbar
+		end)
+	end
+	local portraits = ns.OtherPlayerPortraitsOption
+	if portraits and portraits.available() then
+		options[#options + 1] = portraits
+	end
+	def.options = options[1] and options or nil
+	Movers.Register(def)
 end
 
 -- TargetofTargetFrameTemplate's XML anchor, and FocusFrameMixin:SetSmallSize's two variants.

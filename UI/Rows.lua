@@ -12,13 +12,15 @@
 --   range(context)       slider only: min, max, step
 --   minText, maxText     slider only, optional: captions under the ends (like Blizzard's Narrow / Wide)
 --   formatValue(value)   slider only, optional: text shown right of the slider (like Blizzard's "100%")
+--   editable             slider only, optional: a box right of the slider where a value can be typed instead
 -- `context` is whatever the rows are shown for: an Edit Mode system frame, or a mover definition.
 local _, ns = ...
 
 local Rows = {}
 ns.Rows = Rows
 
-local ipairs, pairs = ipairs, pairs
+local ipairs, pairs, tonumber, tostring = ipairs, pairs, tonumber, tostring
+local floor, min, max = math.floor, math.min, math.max
 
 local LABEL_WIDTH, DROPDOWN_WIDTH, ROW_HEIGHT, CHECKBOX_LABEL_WIDTH = 100, 225, 32, 300
 
@@ -119,7 +121,39 @@ local function SetupCheckboxRow(row, option, context)
 end
 
 -- Like EditModeSettingSliderTemplate: sized like the dropdowns, a little narrower when it shows its value.
-local SLIDER_WIDTH, SLIDER_WITH_VALUE_WIDTH = DROPDOWN_WIDTH, 195
+local SLIDER_WIDTH, SLIDER_WITH_VALUE_WIDTH, SLIDER_WITH_INPUT_WIDTH, INPUT_WIDTH = DROPDOWN_WIDTH, 195, 172, 44
+
+-- Rounds a typed value to the slider's steps and keeps it in range. Returns nil for anything that isn't a number.
+local function SnapToRange(value, minValue, maxValue, step)
+	value = tonumber(value)
+	if not value or value ~= value then return nil end
+	value = minValue + floor((value - minValue) / step + 0.5) * step
+	return min(max(value, minValue), maxValue)
+end
+
+local function FormatInput(value)
+	if value == floor(value) then return tostring(floor(value)) end
+	return tostring(value)
+end
+
+local function ResetInput(row)
+	if row.option then
+		row.Input:SetText(FormatInput(row.option.get(row.context)))
+	end
+	row.Input:SetCursorPosition(0)
+end
+
+local function CommitInput(row)
+	if not (row.option and row.disabledReason == nil) then return ResetInput(row) end
+	local value = SnapToRange(row.Input:GetText(), row.option.range(row.context))
+	if value ~= nil then
+		row.initInProgress = true
+		row.Slider:SetValue(value)
+		row.initInProgress = false
+		row.option.set(row.context, value)
+	end
+	ResetInput(row)
+end
 
 local function CreateSliderRow(parent)
 	local row = CreateFrame("Frame", nil, parent)
@@ -137,7 +171,31 @@ local function CreateSliderRow(parent)
 		if not row.initInProgress and row.option then
 			row.option.set(row.context, value)
 		end
+		if row.Input:IsShown() and not row.Input:HasFocus() then
+			row.Input:SetText(FormatInput(value))
+		end
 	end, row)
+
+	-- The box for typing a value (option.editable). Enter applies it, Escape puts the current value back.
+	local input = CreateFrame("EditBox", nil, row, "InputBoxTemplate")
+	input:SetSize(INPUT_WIDTH, 20)
+	input:SetPoint("LEFT", row.Slider, "RIGHT", 8, 0)
+	input:SetAutoFocus(false)
+	input:SetMaxLetters(6)
+	input:SetJustifyH("CENTER")
+	input:SetScript("OnEnterPressed", function(self)
+		CommitInput(row)
+		self:ClearFocus()
+	end)
+	input:SetScript("OnEscapePressed", function(self)
+		ResetInput(row)
+		self:ClearFocus()
+	end)
+	input:SetScript("OnEditFocusLost", function() ResetInput(row) end)
+	input:SetScript("OnEnter", function(self) ShowReasonTooltip(row, self) end)
+	input:SetScript("OnLeave", HideReasonTooltip)
+	input:Hide()
+	row.Input = input
 
 	-- The disabled reason shows when hovering the slider, as on the other rows.
 	row.Slider.Slider:HookScript("OnEnter", function() ShowReasonTooltip(row, row.Slider) end)
@@ -162,7 +220,11 @@ local function SetupSliderRow(row, option, context)
 	row.Slider.MaxText:SetShown(option.maxText ~= nil)
 
 	local formatters = {}
-	if option.formatValue then
+	row.Input:SetShown(option.editable == true)
+	if option.editable then
+		row.Slider.RightText:Hide()
+		row.Slider:SetWidth(SLIDER_WITH_INPUT_WIDTH)
+	elseif option.formatValue then
 		local right = MinimalSliderWithSteppersMixin.Label.Right
 		formatters[right] = CreateMinimalSliderFormatter(right, option.formatValue)
 		row.Slider:SetWidth(SLIDER_WITH_VALUE_WIDTH)
@@ -176,9 +238,16 @@ local function SetupSliderRow(row, option, context)
 	row.Slider:Init(option.get(context), minValue, maxValue, (maxValue - minValue) / step, formatters)
 	row.initInProgress = false
 	row.Slider:SetEnabled(row.disabledReason == nil)
+	if option.editable then
+		row.Input:SetEnabled(row.disabledReason == nil)
+		row.Input:SetTextColor((row.disabledReason == nil and HIGHLIGHT_FONT_COLOR or DISABLED_FONT_COLOR):GetRGB())
+		row.Input:ClearFocus()
+		ResetInput(row)
+	end
 end
 
 local function IsSliderInUse(row)
+	if row.Input:IsShown() and row.Input:HasFocus() then return true end
 	local slider = row.Slider.Slider
 	return slider.IsDraggingThumb ~= nil and slider:IsDraggingThumb()
 end
@@ -213,7 +282,7 @@ function Rows.CreateSet(parent)
 		return #options
 	end
 
-	-- True while a dropdown menu is open or a slider is being dragged, so a refresh doesn't rebuild it under the
+	-- True while a dropdown menu is open or a slider is being dragged or typed in, so a refresh doesn't rebuild it under the
 	-- player.
 	function set:IsMenuOpen()
 		for _, row in ipairs(self.pools.dropdown) do

@@ -24,6 +24,17 @@ L.HIDE_OWN_FRAME = "Hide Own Frame"
 L.HIDE_PARTY_TITLE = "Hide Party Title"
 L.HIDE_DPS_ROLE_ICONS = "Hide DPS Role Icons"
 L.TANK_HEALER_POWER_BARS = "Only Tank & Healer Power Bars"
+L.HIDE_PORTRAIT_COMBAT_TEXT = "Hide Portrait Combat Text"
+L.HIDE_PLAYER_NAME = "Hide Player Name"
+L.LEVEL_SCALE = "Level Scale"
+-- Fallbacks only; Blizzard's REPLACE_MY_PLAYER_PORTRAIT and REPLACE_OTHER_PLAYER_PORTRAITS are used when present.
+L.CLASS_ICON_MY_PORTRAIT = "Show My Class Icon as Portrait"
+L.CLASS_ICON_OTHER_PORTRAITS = "Show Other Players' Class Icons as Portraits"
+-- Fallbacks only; Blizzard's STATUSTEXT_LABEL and STATUS_TEXT_* globals are used when present.
+L.STATUS_TEXT = "Status Text"
+L.STATUS_TEXT_VALUE = "Numeric Value"
+L.STATUS_TEXT_PERCENT = "Percentage"
+L.STATUS_TEXT_BOTH = "Both"
 L.RAID_STYLE_ONLY_TOOLTIP = "Only available with Use Raid-Style Party Frames."
 
 L.TARGET_OF_TARGET = "Target of Target"

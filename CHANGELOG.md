@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.2] - 2026-11-27
+
+### Added
+- Hide Portrait Combat Text and Hide Player Name for the Player Frame.
+- Level Scale for the Player, Target and Focus Frames, to resize the round level badge.
+- Blizzard's class icon portrait options on the Player, Target, Focus, Target of Target and
+  Focus Target frames.
+- Status Text on the Player, Target and Focus Frames: Blizzard's Interface option (Numeric Value,
+  Percentage, Both or None), now also in Edit Mode.
+
 ## [1.0.1] - 2026-11-27
 
 ### Added

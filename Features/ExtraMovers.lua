@@ -69,9 +69,11 @@ local function RegisterToT(key, label, parentName, defaultOffsets)
 		end
 	end
 
+	local portraits = ns.OtherPlayerPortraitsOption
 	Movers.Register({
 		key = key,
 		label = label,
+		options = portraits and portraits.available() and { portraits } or nil,
 		isAvailable = function()
 			local parent, tot = Parts()
 			return parent ~= nil and tot ~= nil

@@ -57,6 +57,21 @@ power bar, because that position is shared with Blizzard's protected private aur
 
 ### Text
 
+**Hide Portrait Combat Text** (Player Frame) hides the damage, healing and miss numbers that flash over your
+portrait. **Hide Player Name** removes your name from the Player Frame.
+
+**Level Scale** (Player, Target and Focus Frames) makes the round level badge bigger or smaller, from 50% to
+200%. It grows around its center, so it stays in place on the frame.
+
+**Class icon portraits** bring Blizzard's two Interface options into Edit Mode. The Player Frame gets the one
+that replaces your own portrait with your class icon. The Target, Focus, Target of Target and Focus Target frames
+get the one for other players. Both are shared with Blizzard's options, so changing them in either place updates
+the other.
+
+**Status Text** (Player, Target and Focus Frames) is Blizzard's own Status Text option from the Interface
+settings, available right in Edit Mode: Numeric Value, Percentage, Both or None. Like the original it applies to
+every unit frame, and changing it in either place updates the other.
+
 **Keybind Text** on every action bar can be Default, Short or Hidden. Short turns Shift + Mouse Button 4 into
 `SM4`, Ctrl + Numpad 1 into `CN1` and Mouse Wheel Up into `WU`. Letters and function keys keep their normal names
 with the modifier in front, like `SQ` or `CF1`. Gamepad bindings and the out of range dot are left alone.

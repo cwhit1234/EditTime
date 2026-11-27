@@ -11,6 +11,7 @@
 --   choices(context)     dropdown only: list of { value = v, text = "..." }
 --   range(context)       slider only: min, max, step
 --   minText, maxText     slider only, optional: captions under the ends (like Blizzard's Narrow / Wide)
+--   formatValue(value)   slider only, optional: text shown right of the slider (like Blizzard's "100%")
 -- `context` is whatever the rows are shown for: an Edit Mode system frame, or a mover definition.
 local _, ns = ...
 
@@ -117,8 +118,8 @@ local function SetupCheckboxRow(row, option, context)
 	end)
 end
 
--- Like EditModeSettingSliderTemplate with hideValue: captions instead of a number. Sized like the dropdowns.
-local SLIDER_WIDTH = DROPDOWN_WIDTH
+-- Like EditModeSettingSliderTemplate: sized like the dropdowns, a little narrower when it shows its value.
+local SLIDER_WIDTH, SLIDER_WITH_VALUE_WIDTH = DROPDOWN_WIDTH, 195
 
 local function CreateSliderRow(parent)
 	local row = CreateFrame("Frame", nil, parent)
@@ -160,9 +161,19 @@ local function SetupSliderRow(row, option, context)
 	row.Slider.MaxText:SetText(option.maxText or "")
 	row.Slider.MaxText:SetShown(option.maxText ~= nil)
 
+	local formatters = {}
+	if option.formatValue then
+		local right = MinimalSliderWithSteppersMixin.Label.Right
+		formatters[right] = CreateMinimalSliderFormatter(right, option.formatValue)
+		row.Slider:SetWidth(SLIDER_WITH_VALUE_WIDTH)
+	else
+		row.Slider.RightText:Hide()
+		row.Slider:SetWidth(SLIDER_WIDTH)
+	end
+
 	local minValue, maxValue, step = option.range(context)
 	row.initInProgress = true
-	row.Slider:Init(option.get(context), minValue, maxValue, (maxValue - minValue) / step, {})
+	row.Slider:Init(option.get(context), minValue, maxValue, (maxValue - minValue) / step, formatters)
 	row.initInProgress = false
 	row.Slider:SetEnabled(row.disabledReason == nil)
 end

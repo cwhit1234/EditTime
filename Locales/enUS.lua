@@ -7,7 +7,9 @@ ns.L = L
 L.MATCH_WIDTH = "Match Width"
 L.MATCH_HEIGHT = "Match Height"
 L.MATCH_LOCKED_TOOLTIP = "Unavailable while locked to the Player Frame."
-L.MATCH_DEFAULT_POSITION_TOOLTIP = "Move this frame out of its default position to match another frame's size."
+L.MATCH_DEFAULT_POSITION_TOOLTIP = "Move this frame out of its default position first."
+L.BAR_WIDTH = "Bar Width"
+L.BAR_WIDTH_MATCHED_TOOLTIP = "Unavailable while Match Width is set."
 L.VISIBILITY = "Visibility"
 
 L.HORIZONTAL_GROWTH = "Horizontal Growth"

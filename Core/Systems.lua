@@ -67,6 +67,8 @@ end
 --
 -- "stretch" adapters resize each dimension on its own:
 --   width/height = { apply(frame, size), restore(frame) }; a missing dimension isn't offered.
+--   A dimension may also have custom = { min, max, step, natural(frame) }: a slider that sets the size directly
+--   when nothing is matched. natural(frame) is the size Blizzard gives the frame, shown when the slider is unset.
 --
 -- "scale" adapters (icon-based frames) scale uniformly to reach the target size in one dimension:
 --   naturalScale(frame) -> the scale Blizzard would use; restored when matching is off
@@ -110,6 +112,18 @@ local function SettingDimension(setter, getSettingSize)
 end
 
 -- Cast Bar
+
+-- The widths CastingBarMixin:SetLook gives each look.
+local function CastBarNaturalWidth(frame)
+	local look = frame.look
+	if look == "UNITFRAME" then
+		return 150
+	elseif look == "CLASSIC" then
+		return frame.classicStyleCastBar and 195 or 208
+	end
+	return 208
+end
+
 local castBar = {
 	mode = "stretch",
 	blockedReason = function(frame)
@@ -121,16 +135,10 @@ local castBar = {
 	width = {
 		apply = SetWidth,
 		restore = function(frame)
-			-- The widths CastingBarMixin:SetLook gives each look.
-			local look = frame.look
-			if look == "UNITFRAME" then
-				frame:SetWidth(150)
-			elseif look == "CLASSIC" then
-				frame:SetWidth(frame.classicStyleCastBar and 195 or 208)
-			else
-				frame:SetWidth(208)
-			end
+			frame:SetWidth(CastBarNaturalWidth(frame))
 		end,
+		-- Blizzard only offers Bar Size (a scale) for the cast bar. 148 puts the usual 208 width on a 10 pixel step.
+		custom = { min = 148, max = 828, step = 10, natural = CastBarNaturalWidth },
 	},
 	hooks = { "SetLook", "UpdateSystem", "ApplySystemAnchor", "UpdateSystemSettingBarSize" },
 }

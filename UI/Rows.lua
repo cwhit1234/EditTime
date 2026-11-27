@@ -3,12 +3,14 @@
 -- callbacks route into EditModeSystemSettingsDialog:OnSettingValueChanged.
 --
 -- Option fields (the same everywhere options are registered):
---   kind                 "dropdown" or "checkbox"
+--   kind                 "dropdown", "checkbox" or "slider"
 --   label(context)       row label text
 --   disabledReason(context)  optional; nil if usable, else the tooltip explaining why not
 --   get(context)         current value
 --   set(context, value)  store a new value
 --   choices(context)     dropdown only: list of { value = v, text = "..." }
+--   range(context)       slider only: min, max, step
+--   minText, maxText     slider only, optional: captions under the ends (like Blizzard's Narrow / Wide)
 -- `context` is whatever the rows are shown for: an Edit Mode system frame, or a mover definition.
 local _, ns = ...
 
@@ -115,16 +117,71 @@ local function SetupCheckboxRow(row, option, context)
 	end)
 end
 
-local CREATE = { dropdown = CreateDropdownRow, checkbox = CreateCheckboxRow }
-local SETUP = { dropdown = SetupDropdownRow, checkbox = SetupCheckboxRow }
+-- Like EditModeSettingSliderTemplate with hideValue: captions instead of a number. Sized like the dropdowns.
+local SLIDER_WIDTH = DROPDOWN_WIDTH
+
+local function CreateSliderRow(parent)
+	local row = CreateFrame("Frame", nil, parent)
+	row:SetSize(Rows.WIDTH, ROW_HEIGHT)
+
+	row.Label = row:CreateFontString(nil, "ARTWORK", "GameFontHighlightMedium")
+	row.Label:SetJustifyH("LEFT")
+	row.Label:SetSize(LABEL_WIDTH, ROW_HEIGHT)
+
+	row.Slider = CreateFrame("Frame", nil, row, "MinimalSliderWithSteppersTemplate")
+	row.Slider:SetSize(SLIDER_WIDTH, ROW_HEIGHT)
+	row.Slider:SetPoint("LEFT", row.Label, "RIGHT", 5, 0)
+
+	row.Slider:RegisterCallback(MinimalSliderWithSteppersMixin.Event.OnValueChanged, function(_, value)
+		if not row.initInProgress and row.option then
+			row.option.set(row.context, value)
+		end
+	end, row)
+
+	-- The disabled reason shows when hovering the slider, as on the other rows.
+	row.Slider.Slider:HookScript("OnEnter", function() ShowReasonTooltip(row, row.Slider) end)
+	row.Slider.Slider:HookScript("OnLeave", function() HideReasonTooltip(row.Slider) end)
+	return row
+end
+
+local function SetupSliderRow(row, option, context)
+	row.option, row.context = option, context
+	row.Label:SetText(option.label(context))
+	row.disabledReason = option.disabledReason and option.disabledReason(context) or nil
+	SetLabelEnabled(row.Label, row.disabledReason == nil)
+
+	-- With captions the row is taller and the label sits a little higher, like Blizzard's.
+	local hasCaptions = option.minText ~= nil or option.maxText ~= nil
+	row:SetHeight(hasCaptions and 38 or ROW_HEIGHT)
+	row.Label:ClearAllPoints()
+	row.Label:SetPoint("LEFT", row, "LEFT", 0, hasCaptions and 3 or 0)
+	row.Slider.MinText:SetText(option.minText or "")
+	row.Slider.MinText:SetShown(option.minText ~= nil)
+	row.Slider.MaxText:SetText(option.maxText or "")
+	row.Slider.MaxText:SetShown(option.maxText ~= nil)
+
+	local minValue, maxValue, step = option.range(context)
+	row.initInProgress = true
+	row.Slider:Init(option.get(context), minValue, maxValue, (maxValue - minValue) / step, {})
+	row.initInProgress = false
+	row.Slider:SetEnabled(row.disabledReason == nil)
+end
+
+local function IsSliderInUse(row)
+	local slider = row.Slider.Slider
+	return slider.IsDraggingThumb ~= nil and slider:IsDraggingThumb()
+end
+
+local CREATE = { dropdown = CreateDropdownRow, checkbox = CreateCheckboxRow, slider = CreateSliderRow }
+local SETUP = { dropdown = SetupDropdownRow, checkbox = SetupCheckboxRow, slider = SetupSliderRow }
 
 -- A set of rows inside `parent` (a VerticalLayoutFrame), reused across updates.
 function Rows.CreateSet(parent)
-	local set = { parent = parent, pools = { dropdown = {}, checkbox = {} } }
+	local set = { parent = parent, pools = { dropdown = {}, checkbox = {}, slider = {} } }
 
 	-- Shows one row per option, in order, and hides the rest. Returns the number of rows shown.
 	function set:Show(options, context)
-		local used = { dropdown = 0, checkbox = 0 }
+		local used = { dropdown = 0, checkbox = 0, slider = 0 }
 		for index, option in ipairs(options) do
 			local kind = option.kind
 			used[kind] = used[kind] + 1
@@ -145,10 +202,16 @@ function Rows.CreateSet(parent)
 		return #options
 	end
 
-	-- True while one of the dropdown menus is open, so a refresh doesn't rebuild it under the player.
+	-- True while a dropdown menu is open or a slider is being dragged, so a refresh doesn't rebuild it under the
+	-- player.
 	function set:IsMenuOpen()
 		for _, row in ipairs(self.pools.dropdown) do
 			if row:IsShown() and row.Dropdown.IsMenuOpen and row.Dropdown:IsMenuOpen() then
+				return true
+			end
+		end
+		for _, row in ipairs(self.pools.slider) do
+			if row:IsShown() and IsSliderInUse(row) then
 				return true
 			end
 		end

@@ -11,6 +11,7 @@ ns.SizeMatch = SizeMatch
 
 local DIMENSIONS = { "width", "height" }
 local FIELD = { width = "widthMatch", height = "heightMatch" }
+local CUSTOM_FIELD = { width = "customWidth", height = "customHeight" }
 local SIZE_EPSILON, SCALE_EPSILON = 0.05, 0.0005
 
 local hooksecurefunc, ipairs, pairs, type, abs = hooksecurefunc, ipairs, pairs, type, math.abs
@@ -144,13 +145,18 @@ local function TargetSizeFor(source, target, dimension)
 	return size * targetScale / sourceScale
 end
 
-local function ApplyStretch(frame, adapter, dimension, target)
+-- Size comes from the matched frame if there is one, otherwise from the custom size slider.
+local function ApplyStretch(frame, adapter, dimension, target, custom)
 	local handler = adapter[dimension]
 	if not handler then return end
 
+	local size = custom
 	if target then
-		local size = TargetSizeFor(frame, target, dimension)
+		size = TargetSizeFor(frame, target, dimension)
 		if not size then return end -- keep the last good size
+	end
+
+	if size then
 		if IsModified(frame, dimension) and abs(GetSize(frame, dimension) - size) < SIZE_EPSILON then
 			return
 		end
@@ -214,7 +220,9 @@ local function Refresh()
 				end
 			else
 				for _, dimension in ipairs(DIMENSIONS) do
-					ApplyStretch(frame, adapter, dimension, targets[dimension])
+					local custom = not blocked and adapter[dimension] and adapter[dimension].custom
+						and Layouts.Get(sourceKey, CUSTOM_FIELD[dimension])
+					ApplyStretch(frame, adapter, dimension, targets[dimension], type(custom) == "number" and custom or nil)
 				end
 			end
 		end
@@ -261,6 +269,55 @@ for order, dimension in ipairs(DIMENSIONS) do
 			return list
 		end,
 	})
+end
+
+-- Custom size sliders (e.g. Bar Width on the cast bar) ---------------------------------------------------------------
+
+local CUSTOM_LABELS = { width = "BAR_WIDTH" }
+
+for order, dimension in ipairs(DIMENSIONS) do
+	local function Custom(system)
+		local adapter = Systems.GetSizeAdapter(system)
+		return adapter and adapter.mode == "stretch" and adapter[dimension] and adapter[dimension].custom
+	end
+
+	if CUSTOM_LABELS[dimension] then
+		ns.RegisterOption({
+			kind = "slider",
+			order = 8 + order,
+			appliesTo = function(system)
+				return Custom(system) ~= nil
+			end,
+			label = function()
+				return ns.L[CUSTOM_LABELS[dimension]]
+			end,
+			disabledReason = function(system)
+				local reason = Systems.GetSizeAdapter(system).blockedReason(system)
+				if reason then return reason end
+				if SizeMatch.GetTarget(Systems.KeyFor(system), dimension) then
+					return ns.L.BAR_WIDTH_MATCHED_TOOLTIP
+				end
+				return nil
+			end,
+			range = function(system)
+				local custom = Custom(system)
+				return custom.min, custom.max, custom.step
+			end,
+			minText = NARROW,
+			maxText = WIDE,
+			get = function(system)
+				local value = Layouts.Get(Systems.KeyFor(system), CUSTOM_FIELD[dimension])
+				if type(value) == "number" then return value end
+				return Custom(system).natural(system)
+			end,
+			set = function(system, value)
+				-- Back at Blizzard's own size: store nothing, so the bar follows Blizzard's look again.
+				if abs(value - Custom(system).natural(system)) < 0.5 then value = nil end
+				Layouts.Set(Systems.KeyFor(system), CUSTOM_FIELD[dimension], value)
+				ns.RequestRefresh()
+			end,
+		})
+	end
 end
 
 -- Hook every target that any stored rule references, even for systems not loaded yet when a rule was saved.

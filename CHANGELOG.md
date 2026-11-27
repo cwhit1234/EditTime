@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.1] - 2026-11-27
+
+### Added
+- Bar Width slider for the Cast Bar once it's unlocked from the Player Frame, so it can be made
+  wider without changing its height.
+
+### Fixed
+- Only Tank and Healer Power Bars no longer leaves an empty strip where the power bar was. The
+  health bar now fills that space.
+
 ## [1.0.0] - 2026-11-25
 
 ### Added

@@ -61,16 +61,46 @@ end
 
 -- What DefaultCompactUnitFrameSetup does with the power bar shown vs. hidden: the health bar ends 1 pixel above
 -- the frame's bottom, or 1 pixel above the 8-pixel power bar.
+local HEALTH_BOTTOM_NO_POWER, HEALTH_BOTTOM_WITH_POWER = 1, 9
+
+-- Where the health bar's right edge goes. Blizzard's max health loss bar pulls it left by the share of max health
+-- the unit has lost (only with the showTempMaxHealthLoss CVar on). The anchor itself is never read back: once
+-- Blizzard anchors it with a secret value, the frame's points are secret too. If the loss value is secret, the
+-- health bar keeps its full width; the loss bar is drawn over that part of it anyway.
+local function HealthBarRightOffset(frame, lossValue)
+	if not (C_CVar and C_CVar.GetCVarBool and C_CVar.GetCVarBool("showTempMaxHealthLoss")) then return -1 end
+	if lossValue == nil and GetUnitTotalModifiedMaxHealthPercent and type(frame.displayedUnit) == "string" then
+		lossValue = GetUnitTotalModifiedMaxHealthPercent(frame.displayedUnit)
+	end
+	if issecretvalue(lossValue) or type(lossValue) ~= "number" then return -1 end
+	local width = frame:GetWidth()
+	if issecretvalue(width) or type(width) ~= "number" then return -1 end
+	return -1 - width * math.min(math.max(lossValue, 0), 1)
+end
+
+local function SetHealthBarBottom(frame, y, lossValue)
+	frame.healthBar:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", HealthBarRightOffset(frame, lossValue), y)
+end
+
 local function SetPowerBarHidden(frame, hide)
-	local powerBar, healthBar = frame.powerBar, frame.healthBar
 	if hide then
-		powerBar:Hide()
-		healthBar:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -1, 1)
+		frame.powerBar:Hide()
+		SetHealthBarBottom(frame, HEALTH_BOTTOM_NO_POWER)
 		powerHidden[frame] = true
 	else
-		powerBar:Show()
-		healthBar:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -1, 9)
+		frame.powerBar:Show()
+		SetHealthBarBottom(frame, HEALTH_BOTTOM_WITH_POWER)
 		powerHidden[frame] = nil
+	end
+end
+
+-- Blizzard's max health loss bar re-anchors the health bar on every full update, using the bottom offset it saved
+-- during setup (which still leaves room for the power bar). Put the bottom edge back where EditTime wants it.
+local function OnTempMaxHealthLossUpdated(frame, lossValue)
+	if powerHidden[frame] and frame.healthBar then
+		Combat.Run(frame.healthBar, function()
+			if powerHidden[frame] then SetHealthBarBottom(frame, HEALTH_BOTTOM_NO_POWER, lossValue) end
+		end, frame.healthBar)
 	end
 end
 
@@ -196,5 +226,8 @@ ns.OnReady(function()
 	end
 	if type(CompactUnitFrame_UpdateRoleIcon) == "function" then
 		hooksecurefunc("CompactUnitFrame_UpdateRoleIcon", OnRoleIconUpdated)
+	end
+	if type(CompactUnitFrame_UpdateTempMaxHPLoss) == "function" then
+		hooksecurefunc("CompactUnitFrame_UpdateTempMaxHPLoss", OnTempMaxHealthLossUpdated)
 	end
 end)

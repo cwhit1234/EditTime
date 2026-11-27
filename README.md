@@ -23,6 +23,10 @@ up as the other frame changes size, and anything that changes during combat is a
 | Bags                      | Yes   | Yes    | Scales as a whole, so pick width or height              |
 | Micro Menu                | Yes   | Yes    | Scales as a whole, so pick width or height              |
 
+Blizzard only gives the Cast Bar a Bar Size setting, which scales the whole bar. Once the Cast Bar is unlocked
+from the Player Frame and moved, EditTime adds a **Bar Width** slider so you can make it wider (or narrower)
+without changing its height. Match Width takes over while it's set.
+
 Bags and the Micro Menu scale evenly so the buttons keep their shape. Since a single scale can only fit one
 target, choosing a width match clears the height match and vice versa. Any Edit Mode frame can be the one you
 match to, including Cooldown Viewer groups, action bars and unit frames.
